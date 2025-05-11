@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>画像判定アプリ</title>
+</head>
+<body>
+    <div class="container py-5 text-center">
+        <h2 class="mb-4">画像判定致します。</h2>
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input id="img_data" type="hidden" name="img_data" />
+            </div>
+            <img id="preview" style="display: none;" class="img-fluid mb-3"/>
+            <br>
+            <button type="submit" class="btn btn-primary btn-lg">判定</button>
+        </form>
+
+    {% if prediction %}
+        <div id="prediction">
+            <hr>
+            <h2 class="mb-4">判定結果</h2>
+            <p>あなたの選択した画像は、きっと以下のいずれかでしょう。</p>
+            <img src = "{{ img_data }}" class="img_fluid mb-3">
+            <br>
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>分類</th>
+                        <th>確率 (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in table_predictions %}
+                    <tr>
+                        <td>{{ p.label }}</td>
+                        <td>{{ p.prob }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(function(){
+            $("#id_image").on('change', function(){
+                var reader = new FileReader();
+                reader.onload = function(){
+                    $("#preview").attr('src', reader.result);
+                    $("#preview").show();
+                    $("#img_data").val(reader.result);
+            }
+            reader.readAsDataURL(this.files[0]);
+            $("#prediction").text('');
+            });
+        });
+    </script>
+</body>
